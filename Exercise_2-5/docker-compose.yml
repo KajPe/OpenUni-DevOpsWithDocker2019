@@ -1,0 +1,28 @@
+version: '3' 
+
+services: 
+  backend:
+    image: myback
+    build: backend/.
+    ports:
+      - 8000:8000
+    volumes:
+      - ./logs.txt:/app/backend/logs.txt
+    container_name: back
+    environment:
+      - REDIS=myredis
+    depends_on:
+      - myredis
+
+  frontend:  
+    image: myfront
+    build: frontend/.
+    ports:
+      - 5000:5000
+    container_name: front
+    depends_on:
+      - backend
+
+  myredis:
+    image: redis
+    container_name: redis
