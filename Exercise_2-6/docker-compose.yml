@@ -1,0 +1,39 @@
+version: '3.5' 
+
+services: 
+  backend:
+    image: myback
+    build: backend/.
+    ports:
+      - 8000:8000
+    volumes:
+      - ./logs.txt:/app/backend/logs.txt
+    container_name: back
+    environment:
+      - REDIS=myredis
+      - DB_USERNAME=backend
+      - DB_PASSWORD=Secret292
+      - DB_HOST=db
+    depends_on:
+      - myredis
+      - db
+
+  frontend:  
+    image: myfront
+    build: frontend/.
+    ports:
+      - 5000:5000
+    container_name: front
+    depends_on:
+      - backend
+
+  myredis:
+    image: redis
+    container_name: redis
+
+  db:
+    image: postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=backend
+      - POSTGRES_PASSWORD=Secret292
