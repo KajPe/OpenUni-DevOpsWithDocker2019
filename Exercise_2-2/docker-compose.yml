@@ -1,0 +1,9 @@
+version: '3' 
+
+services: 
+  ex22:  
+    image: devopsdockeruh/ports_exercise
+    ports:
+      - 80:80
+    container_name: exercise2.2
+
