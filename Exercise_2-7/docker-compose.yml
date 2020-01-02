@@ -1,0 +1,36 @@
+version: '3.5' 
+
+services: 
+  frontend:  
+    image: mlfrontend
+    build: https://github.com/docker-hy/ml-kurkkumopo-frontend.git
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    container_name: mlfront
+    depends_on:
+      - backend
+
+  backend:
+    image: mlbackend
+    build: https://github.com/docker-hy/ml-kurkkumopo-backend.git
+    restart: unless-stopped
+    ports:
+      - 5000:5000
+    volumes:
+      - models:/src/model
+    container_name: mlback
+
+  training:
+    image: mltraining
+    build: https://github.com/docker-hy/ml-kurkkumopo-training.git
+    volumes:
+      - models:/src/model
+      - images:/src/imgs
+    container_name: mltrain
+    depends_on:
+      - backend
+
+volumes:
+  images:
+  models:
