@@ -1,0 +1,41 @@
+# Use alpine based node as base image
+FROM node:10-alpine3.11
+
+# Set frontend URL for cross-origin allowance
+ENV FRONT_URL=http://localhost:5000
+
+RUN apk --no-cache add git \
+    # Clone backend code
+    && mkdir /app && cd /app \
+    && git clone https://github.com/docker-hy/backend-example-docker.git backend \
+    && cd backend \
+    # Install modules
+    && npm install \
+    # Clean up
+    && apk del git \
+    && npm cache clean --force \
+    && cd /tmp && rm -rf * \
+    #
+    # Set ownership
+    #
+    && cd /app \
+    # Create group www-data
+    && addgroup -S www-data \
+    # Create user www-data
+    && adduser -S www-data \
+    # Make www-data owner of everything under /app
+    && chown -R www-data:www-data * \
+    # Set sticky bit on all under /app
+    && chmod g+s .
+
+# Run container as user www-data
+USER www-data
+
+# Expose port 8000 to host
+EXPOSE 8000
+
+# Change workdir to the the backend code
+WORKDIR /app/backend
+
+# Start the webserver
+CMD [ "npm", "start" ]

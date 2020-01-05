@@ -1,0 +1,41 @@
+# Use alpine based node as base image
+FROM node:10-alpine3.11
+
+# Set backend api URL
+ENV API_URL=http://localhost:8000
+
+RUN apk --no-cache add git \
+    # Clone frontend code
+    && mkdir /app && cd /app \
+    && git clone https://github.com/docker-hy/frontend-example-docker.git frontend \
+    && cd frontend \
+    # Install modules and build production code
+    && npm install && npm run build \
+    # Clean up
+    && apk del git \
+    && npm cache clean --force \
+    && cd /tmp && rm -rf * \
+    #
+    # Set ownership
+    #
+    && cd /app \
+    # Create group www-data
+    && addgroup -S www-data \
+    # Create user www-data
+    && adduser -S www-data \
+    # Make www-data owner of everything under /app
+    && chown -R www-data:www-data * \
+    # Set sticky bit on all under /app
+    && chmod g+s .
+
+# Run container as user www-data
+USER www-data
+
+# Expose port 5000 to host
+EXPOSE 5000
+
+# Change workdir to the the frontend code
+WORKDIR /app/frontend
+
+# Start the webserver
+CMD [ "npm", "start" ]
